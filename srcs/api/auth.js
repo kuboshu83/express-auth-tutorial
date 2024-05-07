@@ -18,20 +18,23 @@ router.post("/login", async (req, res) => {
   const sendJson = respondJson(res);
   const { email, password } = req.body;
   if (!email || !password) {
-    sendJson(400, errMsgJson("email and password parameters are required"));
+    return sendJson(
+      400,
+      errMsgJson("email and password parameters are required")
+    );
   }
   const foundUser = await userdb.findByEmail(email);
   if (!foundUser) {
-    sendJson(400, errMsgJson("no such user"));
+    return sendJson(400, errMsgJson("no such user"));
   }
   const hashedPassword = foundUser.password;
   const isMatch = await bcrypt.compare(password, hashedPassword);
   if (!isMatch) {
-    sendJson(400, errMsgJson("no such user"));
+    return sendJson(400, errMsgJson("no such user"));
   }
   const id = foundUser.id;
   const token = createJwt({ id });
-  sendJson(200, { token });
+  return sendJson(200, { token });
 });
 
 module.exports = router;

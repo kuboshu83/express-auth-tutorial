@@ -2,35 +2,16 @@ const express = require("express");
 const router = express.Router();
 const postdb = require("../infrastructure/postdb");
 const { respondJson, errMsgJson } = require("./utils");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
-SECRET_KEY = process.env.JWT_SECRET_KEY;
+const { authorize } = require("./middleware/authjwt");
 
 router.use(express.json());
-
-const authorize = (req, res, next) => {
-  const sendJson = respondJson(res);
-  const authHeader = req.headers["authorization"];
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    sendJson(401, errMsgJson("unauthorized"));
-  }
-  const token = authHeader.replace("Bearer ", "");
-  try {
-    const { id } = jwt.verify(token, SECRET_KEY);
-    req.id = id;
-    next();
-  } catch (err) {
-    console.log(err);
-    sendJson(401, errMsgJson("unauthorized"));
-  }
-};
 
 router.post("/register", authorize, async (req, res) => {
   const sendJson = respondJson(res);
   const { title, content } = req.body;
   const authorId = req.id;
   if (!authorId) {
-    sendJson(401, errMsgJson("unautorized"));
+    return sendJson(401, errMsgJson("unautorized"));
   }
   try {
     const savedPost = await postdb.createAndSavePost({
@@ -38,10 +19,10 @@ router.post("/register", authorize, async (req, res) => {
       content,
       authorId,
     });
-    sendJson(200, savedPost);
+    return sendJson(200, savedPost);
   } catch (err) {
     console.log(err);
-    sendJson(500, errMsgJson("error at creating and saving post"));
+    return sendJson(500, errMsgJson("error at creating and saving post"));
   }
 });
 

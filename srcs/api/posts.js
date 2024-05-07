@@ -1,18 +1,12 @@
 const express = require("express");
 const router = express.Router();
-router.use(express.json());
 const postdb = require("../infrastructure/postdb");
 const { respondJson, errMsgJson } = require("./utils");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 SECRET_KEY = process.env.JWT_SECRET_KEY;
 
-const extractUserIdFromJwt = (token) => {
-  if (!token) {
-    return null;
-  }
-  return token;
-};
+router.use(express.json());
 
 const authorize = (req, res, next) => {
   const sendJson = respondJson(res);

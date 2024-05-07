@@ -19,4 +19,19 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.get("/email", async (req, res) => {
+  const sendJson = respondJson(res);
+  const { email } = req.body;
+  if (!email) {
+    sendJson(400, errMsgJson("email parameter is required"));
+  }
+  try {
+    const foundUser = await userdb.findByEmail(email);
+    sendJson(200, foundUser);
+  } catch (err) {
+    console.log(err);
+    sendJson(500, errMsgJson("error at finding post"));
+  }
+});
+
 module.exports = router;

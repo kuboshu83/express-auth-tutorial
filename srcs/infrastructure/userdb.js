@@ -31,6 +31,12 @@ const createAndSaveUser = async ({ email, password }) => {
   return savedUser;
 };
 
+const findByEmail = async (email) => {
+  const foundUser = await prisma.user.findUnique({ where: { email } });
+  return foundUser;
+};
+
 module.exports = {
   createAndSaveUser,
+  findByEmail,
 };

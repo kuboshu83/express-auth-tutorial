@@ -3,6 +3,9 @@ const router = express.Router();
 router.use(express.json());
 const postdb = require("../infrastructure/postdb");
 const { respondJson, errMsgJson } = require("./utils");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const extractUserIdFromJwt = (token) => {
   if (!token) {
@@ -11,13 +14,27 @@ const extractUserIdFromJwt = (token) => {
   return token;
 };
 
-router.post("/register", async (req, res) => {
+const authorize = (req, res, next) => {
+  const sendJson = respondJson(res);
+  const authHeader = req.headers["authorization"];
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    sendJson(401, errMsgJson("unauthorized"));
+  }
+  const token = authHeader.replace("Bearer ", "");
+  try {
+    const { id } = jwt.verify(token, SECRET_KEY);
+    req.id = id;
+    next();
+  } catch (err) {
+    console.log(err);
+    sendJson(401, errMsgJson("unauthorized"));
+  }
+};
+
+router.post("/register", authorize, async (req, res) => {
   const sendJson = respondJson(res);
   const { title, content } = req.body;
-  // TODO: ヘッダからjwtを受け取って処理するようにする
-  const authorId = extractUserIdFromJwt(
-    "user_b5eee0c9-e665-4c94-a8f6-2ce61900a80e"
-  );
+  const authorId = req.id;
   if (!authorId) {
     sendJson(401, errMsgJson("unautorized"));
   }

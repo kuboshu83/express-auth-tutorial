@@ -2,11 +2,11 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 
+const userRoute = require("./api/users");
+
 const PORT = process.env.PORT;
 
-app.get("/", (req, res) => {
-  return res.status(200).send("Hello Nodejs");
-});
+app.use("/api/users", userRoute);
 
 app.listen(PORT, () => {
   console.log(`server is running at ${PORT}`);

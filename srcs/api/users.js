@@ -2,16 +2,7 @@ const express = require("express");
 const router = express.Router();
 router.use(express.json());
 const userdb = require("../infrastructure/userdb");
-
-const respondJson = (response) => {
-  return (statusCode, jsonData) => {
-    return response.status(statusCode).json(jsonData);
-  };
-};
-
-const errMsgJson = (message) => {
-  return { message };
-};
+const { respondJson, errMsgJson } = require("./utils");
 
 router.post("/register", async (req, res) => {
   const sendJson = respondJson(res);
